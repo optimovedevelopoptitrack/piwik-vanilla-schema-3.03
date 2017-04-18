@@ -1,8 +1,8 @@
 -- MySQL dump 10.13  Distrib 5.6.34, for linux-glibc2.5 (x86_64)
 --
--- Host: localhost    Database: bitnami_piwik
+-- Host: 173.255.119.191    Database: generaltracker
 -- ------------------------------------------------------
--- Server version	5.6.34
+-- Server version	5.7.14-google-log
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -14,6 +14,15 @@
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+SET @MYSQLDUMP_TEMP_LOG_BIN = @@SESSION.SQL_LOG_BIN;
+SET @@SESSION.SQL_LOG_BIN= 0;
+
+--
+-- GTID state at the beginning of the backup 
+--
+
+SET @@GLOBAL.GTID_PURGED='58e8b2b5-1546-11e7-a56b-42010a80004a:1-1466110,
+e04ec9d8-08b4-11e7-bc39-42010a8004f2:1-1322765';
 
 --
 -- Table structure for table `piwik_access`
@@ -27,27 +36,6 @@ CREATE TABLE `piwik_access` (
   `idsite` int(10) unsigned NOT NULL,
   `access` varchar(10) DEFAULT NULL,
   PRIMARY KEY (`login`,`idsite`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `piwik_archive_blob_2017_02`
---
-
-DROP TABLE IF EXISTS `piwik_archive_blob_2017_02`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `piwik_archive_blob_2017_02` (
-  `idarchive` int(10) unsigned NOT NULL,
-  `name` varchar(255) NOT NULL,
-  `idsite` int(10) unsigned DEFAULT NULL,
-  `date1` date DEFAULT NULL,
-  `date2` date DEFAULT NULL,
-  `period` tinyint(3) unsigned DEFAULT NULL,
-  `ts_archived` datetime DEFAULT NULL,
-  `value` mediumblob,
-  PRIMARY KEY (`idarchive`,`name`),
-  KEY `index_period_archived` (`period`,`ts_archived`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -89,28 +77,6 @@ CREATE TABLE `piwik_archive_blob_2017_04` (
   `ts_archived` datetime DEFAULT NULL,
   `value` mediumblob,
   PRIMARY KEY (`idarchive`,`name`),
-  KEY `index_period_archived` (`period`,`ts_archived`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `piwik_archive_numeric_2017_02`
---
-
-DROP TABLE IF EXISTS `piwik_archive_numeric_2017_02`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `piwik_archive_numeric_2017_02` (
-  `idarchive` int(10) unsigned NOT NULL,
-  `name` varchar(255) NOT NULL,
-  `idsite` int(10) unsigned DEFAULT NULL,
-  `date1` date DEFAULT NULL,
-  `date2` date DEFAULT NULL,
-  `period` tinyint(3) unsigned DEFAULT NULL,
-  `ts_archived` datetime DEFAULT NULL,
-  `value` double DEFAULT NULL,
-  PRIMARY KEY (`idarchive`,`name`),
-  KEY `index_idsite_dates_period` (`idsite`,`date1`,`date2`,`period`,`ts_archived`),
   KEY `index_period_archived` (`period`,`ts_archived`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -218,7 +184,25 @@ CREATE TABLE `piwik_log_action` (
   `url_prefix` tinyint(2) DEFAULT NULL,
   PRIMARY KEY (`idaction`),
   KEY `index_type_hash` (`type`,`hash`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=280624006 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `piwik_log_action_dup`
+--
+
+DROP TABLE IF EXISTS `piwik_log_action_dup`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `piwik_log_action_dup` (
+  `idaction` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` text,
+  `hash` int(10) unsigned NOT NULL,
+  `type` tinyint(3) unsigned DEFAULT NULL,
+  `url_prefix` tinyint(2) DEFAULT NULL,
+  PRIMARY KEY (`idaction`),
+  KEY `index_type_hash` (`type`,`hash`)
+) ENGINE=InnoDB AUTO_INCREMENT=226248342 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -233,7 +217,7 @@ CREATE TABLE `piwik_log_conversion` (
   `idsite` int(10) unsigned NOT NULL,
   `idvisitor` binary(8) NOT NULL,
   `server_time` datetime NOT NULL,
-  `idaction_url` int(11) DEFAULT NULL,
+  `idaction_url` int(10) unsigned DEFAULT NULL,
   `idlink_va` bigint(10) unsigned DEFAULT NULL,
   `idgoal` int(10) NOT NULL,
   `buster` int(10) unsigned NOT NULL,
@@ -253,6 +237,9 @@ CREATE TABLE `piwik_log_conversion` (
   `campaign_id` varchar(100) DEFAULT NULL,
   `referer_name` varchar(70) DEFAULT NULL,
   `referer_type` tinyint(1) unsigned DEFAULT NULL,
+  `config_device_brand` varchar(100) DEFAULT NULL,
+  `config_device_model` varchar(100) DEFAULT NULL,
+  `config_device_type` tinyint(100) DEFAULT NULL,
   `location_city` varchar(255) DEFAULT NULL,
   `location_country` char(3) DEFAULT NULL,
   `location_latitude` decimal(9,6) DEFAULT NULL,
@@ -273,9 +260,6 @@ CREATE TABLE `piwik_log_conversion` (
   `custom_var_v4` varchar(200) DEFAULT NULL,
   `custom_var_k5` varchar(200) DEFAULT NULL,
   `custom_var_v5` varchar(200) DEFAULT NULL,
-  `config_device_brand` varchar(100) DEFAULT NULL,
-  `config_device_model` varchar(100) DEFAULT NULL,
-  `config_device_type` tinyint(100) DEFAULT NULL,
   `custom_dimension_1` varchar(255) DEFAULT NULL,
   `custom_dimension_2` varchar(255) DEFAULT NULL,
   `custom_dimension_3` varchar(255) DEFAULT NULL,
@@ -331,6 +315,8 @@ CREATE TABLE `piwik_log_link_visit_action` (
   `idaction_name_ref` int(10) unsigned DEFAULT NULL,
   `custom_float` float DEFAULT NULL,
   `server_time` datetime NOT NULL,
+  `idpageview` char(6) DEFAULT NULL,
+  `interaction_position` smallint(5) unsigned DEFAULT NULL,
   `idaction_name` int(10) unsigned DEFAULT NULL,
   `idaction_url` int(10) unsigned DEFAULT NULL,
   `time_spent_ref_action` int(10) unsigned DEFAULT NULL,
@@ -350,8 +336,6 @@ CREATE TABLE `piwik_log_link_visit_action` (
   `custom_var_v4` varchar(200) DEFAULT NULL,
   `custom_var_k5` varchar(200) DEFAULT NULL,
   `custom_var_v5` varchar(200) DEFAULT NULL,
-  `idpageview` char(6) DEFAULT NULL,
-  `interaction_position` smallint(5) unsigned DEFAULT NULL,
   `time_spent` int(10) unsigned DEFAULT NULL,
   `custom_dimension_1` varchar(255) DEFAULT NULL,
   `custom_dimension_2` varchar(255) DEFAULT NULL,
@@ -361,7 +345,7 @@ CREATE TABLE `piwik_log_link_visit_action` (
   PRIMARY KEY (`idlink_va`),
   KEY `index_idvisit` (`idvisit`),
   KEY `index_idsite_servertime` (`idsite`,`server_time`)
-) ENGINE=InnoDB AUTO_INCREMENT=87 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -406,6 +390,7 @@ CREATE TABLE `piwik_log_visit` (
   `visit_exit_idaction_name` int(10) unsigned DEFAULT NULL,
   `visit_exit_idaction_url` int(10) unsigned DEFAULT '0',
   `visit_total_actions` int(11) unsigned DEFAULT NULL,
+  `visit_total_interactions` smallint(5) unsigned DEFAULT '0',
   `visit_total_searches` smallint(5) unsigned DEFAULT NULL,
   `referer_keyword` varchar(255) DEFAULT NULL,
   `campaign_name` varchar(255) DEFAULT NULL,
@@ -456,7 +441,6 @@ CREATE TABLE `piwik_log_visit` (
   `custom_var_v4` varchar(200) DEFAULT NULL,
   `custom_var_k5` varchar(200) DEFAULT NULL,
   `custom_var_v5` varchar(200) DEFAULT NULL,
-  `visit_total_interactions` smallint(5) unsigned DEFAULT '0',
   `last_idlink_va` bigint(20) unsigned DEFAULT NULL,
   `custom_dimension_1` varchar(255) DEFAULT NULL,
   `custom_dimension_2` varchar(255) DEFAULT NULL,
@@ -467,7 +451,7 @@ CREATE TABLE `piwik_log_visit` (
   KEY `index_idsite_config_datetime` (`idsite`,`config_id`,`visit_last_action_time`),
   KEY `index_idsite_datetime` (`idsite`,`visit_last_action_time`),
   KEY `index_idsite_idvisitor` (`idsite`,`idvisitor`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -515,7 +499,7 @@ CREATE TABLE `piwik_plugin_setting` (
   `setting_name` varchar(255) NOT NULL,
   `setting_value` longtext NOT NULL,
   `user_login` varchar(100) NOT NULL DEFAULT '',
-  KEY `index_plugin_name_user_login` (`plugin_name`,`user_login`)
+  KEY `plugin_name` (`plugin_name`,`user_login`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -623,7 +607,7 @@ CREATE TABLE `piwik_site` (
   `type` varchar(255) NOT NULL,
   `keep_url_fragment` tinyint(4) NOT NULL DEFAULT '0',
   PRIMARY KEY (`idsite`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -706,6 +690,7 @@ CREATE TABLE `piwik_user_language` (
   PRIMARY KEY (`login`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
+SET @@SESSION.SQL_LOG_BIN = @MYSQLDUMP_TEMP_LOG_BIN;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -716,4 +701,4 @@ CREATE TABLE `piwik_user_language` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-04-12  9:00:55
+-- Dump completed on 2017-04-18 13:00:58
